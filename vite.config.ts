@@ -13,8 +13,8 @@ export default defineConfig({
         name: "StockRoom Locator",
         short_name: "StockRoom",
         description: "Find any shoe box in the overflow stockroom in seconds.",
-        theme_color: "#ffffff",
-        background_color: "#ffffff",
+        theme_color: "#f4f5f6",
+        background_color: "#f4f5f6",
         display: "standalone",
         orientation: "portrait",
         icons: [

@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/photos.ts","./src/scanner.tsx","./src/store.ts","./src/views/admin.tsx","./src/views/find.tsx","./src/views/home.tsx","./src/views/locationcard.tsx","./src/views/locationform.tsx","./src/views/scan.tsx"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/icons.tsx","./src/main.tsx","./src/photos.ts","./src/scanner.tsx","./src/store.ts","./src/views/admin.tsx","./src/views/find.tsx","./src/views/home.tsx","./src/views/locationcard.tsx","./src/views/locationform.tsx","./src/views/scan.tsx"],"version":"5.9.3"}

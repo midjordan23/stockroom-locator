@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { getConfig, Loc, saveLocation } from "../store";
 import { compress, setPhoto, usePhoto } from "../photos";
+import { Icon, icons } from "../icons";
 
 const Chips = ({ opts, value, onPick }: { opts: string[]; value: string; onPick: (v: string) => void }) => (
   <div className="chips">
@@ -24,7 +25,7 @@ export default function LocationForm({ barcode, initial, onSaved }: { barcode: s
       <p className="label">Photo</p>
       {photo && <img className="photo" src={photo} alt="Shoe" />}
       <label className="btn ghost">
-        {photo ? "Retake photo" : "📸 Add photo"}
+        <Icon d={icons.camera} size={19} />{photo ? "Retake photo" : "Add photo"}
         <input type="file" accept="image/*" capture="environment" hidden
           onChange={async (e) => { const f = e.target.files?.[0]; if (f) setShot(await compress(f)); }} />
       </label>

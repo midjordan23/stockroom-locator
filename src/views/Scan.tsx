@@ -19,7 +19,7 @@ export default function Scan() {
   if (stage.step === "found")
     return (
       <div>
-        <h2>Found it 🎯</h2>
+        <h2>Found it</h2>
         <LocationCard item={stage.item} />
         <div className="row-btns">
           <button className="btn ghost" onClick={() => setStage({ step: "move", barcode: stage.item.barcode, item: stage.item })}>Move</button>
@@ -31,7 +31,7 @@ export default function Scan() {
   if (stage.step === "saved")
     return (
       <div>
-        <h2>Saved ✓</h2>
+        <h2>Saved</h2>
         <LocationCard item={stage.item} />
         <button className="btn primary" onClick={() => setStage({ step: "scan" })}>Scan next</button>
       </div>

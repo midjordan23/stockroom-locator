@@ -3,12 +3,13 @@ import LocationCard from "./LocationCard";
 import LocationForm from "./LocationForm";
 import { deleteItem, formatLoc, getItems, Item, timeAgo } from "../store";
 import { delPhoto, usePhoto } from "../photos";
+import { Icon, icons } from "../icons";
 
 function Row({ item, onClick }: { item: Item; onClick: () => void }) {
   const photo = usePhoto(item.barcode);
   return (
     <li onClick={onClick}>
-      {photo ? <img className="thumb" src={photo} alt="" /> : <div className="thumb">👟</div>}
+      {photo ? <img className="thumb" src={photo} alt="" /> : <div className="thumb"><Icon d={icons.box} /></div>}
       <div className="body">
         <p className="title">{item.barcode}</p>
         <p className="sub">{formatLoc(item)}</p>
@@ -55,7 +56,7 @@ export default function Find() {
 
   return (
     <div>
-      <input className="search" inputMode="numeric" placeholder="🔍  Search barcode" value={q} onChange={(e) => setQ(e.target.value)} />
+      <input className="search" inputMode="numeric" placeholder="Search barcode" value={q} onChange={(e) => setQ(e.target.value)} />
       {items.length === 0 ? (
         <p className="empty">{q ? "No match — check the number or scan the box." : "Nothing saved yet. Scan a shoe to get started."}</p>
       ) : (
