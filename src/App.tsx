@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Icon, icons } from "./icons";
 import Home from "./views/Home";
-import Scan from "./views/Scan";
+import Session from "./views/Session";
 import Find from "./views/Find";
 import Admin from "./views/Admin";
 
-export type View = "home" | "scan" | "find" | "admin";
+export type View = "home" | "session" | "find" | "admin";
 
-const TITLES: Record<View, string> = { home: "StockRoom", scan: "Scan", find: "Find a shoe", admin: "Admin" };
-const NAV: [View, string][] = [["home", "Home"], ["scan", "Scan"], ["find", "Find"], ["admin", "Admin"]];
+const TITLES: Record<View, string> = { home: "StockRoom", session: "Shelf session", find: "Find a shoe", admin: "Admin" };
+const NAV: [View, keyof typeof icons, string][] = [["home", "home", "Home"], ["session", "scan", "Session"], ["find", "find", "Find"], ["admin", "admin", "Admin"]];
 
 export default function App() {
   const [view, setView] = useState<View>("home");
@@ -23,14 +23,14 @@ export default function App() {
       </div>
       <div key={epoch}>
         {view === "home" && <Home go={go} />}
-        {view === "scan" && <Scan />}
+        {view === "session" && <Session />}
         {view === "find" && <Find />}
         {view === "admin" && <Admin />}
       </div>
       <nav className="nav">
-        {NAV.map(([v, label]) => (
+        {NAV.map(([v, ic, label]) => (
           <button key={v} className={view === v ? "on" : ""} onClick={() => go(v)}>
-            <Icon d={icons[v]} />{label}
+            <Icon d={icons[ic]} />{label}
           </button>
         ))}
       </nav>

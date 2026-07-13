@@ -1,4 +1,4 @@
-import { formatLoc, getHistory, timeAgo } from "../store";
+import { getSessions, timeAgo } from "../store";
 import { Icon, icons } from "../icons";
 import type { View } from "../App";
 
@@ -9,27 +9,27 @@ const Tile = ({ ic, label, onClick }: { ic: keyof typeof icons; label: string; o
 );
 
 export default function Home({ go }: { go: (v: View) => void }) {
-  const recent = getHistory().slice(0, 5);
+  const recent = getSessions().slice(0, 5);
   return (
     <div>
       <div className="tiles">
-        <Tile ic="scan" label="Scan shoe" onClick={() => go("scan")} />
+        <Tile ic="scan" label="Shelf session" onClick={() => go("session")} />
         <Tile ic="find" label="Find shoe" onClick={() => go("find")} />
-        <Tile ic="box" label="Move shoe" onClick={() => go("scan")} />
+        <Tile ic="box" label="Scan in / out" onClick={() => go("session")} />
         <Tile ic="admin" label="Admin" onClick={() => go("admin")} />
       </div>
-      <p className="label">Recent activity</p>
+      <p className="label">Recent sessions</p>
       {recent.length === 0 ? (
-        <p className="empty">No activity yet — scan your first box.</p>
+        <p className="empty">No sessions yet — scan a shelf label to start.</p>
       ) : (
         <ul className="list">
-          {recent.map((h, i) => (
+          {recent.map((s, i) => (
             <li key={i} style={{ cursor: "default" }}>
               <div className="body">
-                <p className="title">{h.barcode}</p>
-                <p className="sub">{formatLoc(h.to)}</p>
+                <p className="title">{s.shelf}</p>
+                <p className="sub">{s.type === "in" ? "Scan in" : "Scan out"} · {s.ok} scans{s.fail ? ` · ${s.fail} failed` : ""}</p>
               </div>
-              <p className="end muted">{timeAgo(h.movedAt)}</p>
+              <p className="end muted">{timeAgo(s.end)}</p>
             </li>
           ))}
         </ul>

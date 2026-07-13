@@ -1,30 +1,18 @@
 import { useRef, useState } from "react";
-import { AdminCfg, exportSnapshot, formatLoc, getConfig, getHistory, importSnapshot, saveConfig, timeAgo } from "../store";
-
-function CfgList({ label, one, name, cfg, setCfg }: { label: string; one: string; name: keyof AdminCfg; cfg: AdminCfg; setCfg: (c: AdminCfg) => void }) {
-  const [add, setAdd] = useState("");
-  const update = (list: string[]) => { const next = { ...cfg, [name]: list }; saveConfig(next); setCfg(next); };
-  return (
-    <div>
-      <p className="label">{label}</p>
-      <div className="chips">
-        {cfg[name].map((v) => (
-          <button key={v} onClick={() => confirm(`Remove ${v}?`) && update(cfg[name].filter((x) => x !== v))}>{v} ✕</button>
-        ))}
-      </div>
-      <form className="row-btns" style={{ marginTop: 10 }}
-        onSubmit={(e) => { e.preventDefault(); const v = add.trim(); if (v && !cfg[name].includes(v)) update([...cfg[name], v]); setAdd(""); }}>
-        <input className="input" placeholder={`Add ${one}`} value={add} onChange={(e) => setAdd(e.target.value)} />
-        <button className="btn ghost" style={{ width: 90 }}>Add</button>
-      </form>
-    </div>
-  );
-}
+import QRCode from "qrcode";
+import { exportSnapshot, getName, getSessions, importSnapshot, setName, timeAgo } from "../store";
 
 export default function Admin() {
-  const [cfg, setCfg] = useState(getConfig());
+  const [name, setNameState] = useState(getName());
+  const [labels, setLabels] = useState("");
+  const [qrs, setQrs] = useState<{ label: string; url: string }[]>([]);
   const [msg, setMsg] = useState("");
   const file = useRef<HTMLInputElement>(null);
+
+  const makeLabels = async () => {
+    const names = labels.split(/[,\n]/).map((s) => s.trim()).filter(Boolean);
+    setQrs(await Promise.all(names.map(async (label) => ({ label, url: await QRCode.toDataURL(label, { margin: 1, scale: 8 }) }))));
+  };
 
   const doExport = async () => {
     const a = document.createElement("a");
@@ -36,8 +24,8 @@ export default function Admin() {
   const doImport = async (f: File) => {
     try {
       const n = await importSnapshot(await f.text());
-      setCfg(getConfig());
-      setMsg(`Restored ${n} items ✓`);
+      setNameState(getName());
+      setMsg(`Restored ${n} barcodes ✓`);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Import failed.");
     }
@@ -45,10 +33,29 @@ export default function Admin() {
 
   return (
     <div>
-      <CfgList label="Rooms" one="room" name="rooms" cfg={cfg} setCfg={setCfg} />
-      <CfgList label="Racks" one="rack" name="racks" cfg={cfg} setCfg={setCfg} />
-      <CfgList label="Shelves" one="shelf" name="shelves" cfg={cfg} setCfg={setCfg} />
-      <CfgList label="Bins" one="bin" name="bins" cfg={cfg} setCfg={setCfg} />
+      <p className="label">Employee name</p>
+      <input className="input" placeholder="Shown in session history" value={name}
+        onChange={(e) => { setNameState(e.target.value); setName(e.target.value); }} />
+
+      <p className="label">Shelf QR labels</p>
+      <p className="muted">One shelf per line (or comma-separated), e.g. Offsite A1. Generate, then print this page and tape each label to its shelf.</p>
+      <div className="stack" style={{ marginTop: 10 }}>
+        <textarea className="input" rows={3} placeholder={"Offsite A1\nOffsite A2\nOffsite B4"} value={labels} onChange={(e) => setLabels(e.target.value)} />
+        <div className="row-btns">
+          <button className="btn ghost" onClick={makeLabels} disabled={!labels.trim()}>Generate</button>
+          {qrs.length > 0 && <button className="btn primary" onClick={() => window.print()}>Print labels</button>}
+        </div>
+      </div>
+      {qrs.length > 0 && (
+        <div className="qr-grid">
+          {qrs.map((q) => (
+            <figure key={q.label}>
+              <img src={q.url} alt={`QR for ${q.label}`} />
+              <figcaption>{q.label}</figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
 
       <p className="label">Backup</p>
       <div className="row-btns">
@@ -58,18 +65,18 @@ export default function Admin() {
       <input ref={file} type="file" accept=".json" hidden onChange={(e) => e.target.files?.[0] && doImport(e.target.files[0])} />
       {msg && <p className="hint">{msg}</p>}
 
-      <p className="label">Move history</p>
-      {getHistory().length === 0 ? (
-        <p className="empty">No moves yet.</p>
+      <p className="label">Session history</p>
+      {getSessions().length === 0 ? (
+        <p className="empty">No sessions yet.</p>
       ) : (
         <ul className="list">
-          {getHistory().slice(0, 50).map((h, i) => (
+          {getSessions().slice(0, 50).map((s, i) => (
             <li key={i} style={{ cursor: "default" }}>
               <div className="body">
-                <p className="title">{h.barcode}</p>
-                <p className="sub">{h.from ? `${formatLoc(h.from)} → ${formatLoc(h.to)}` : `Added at ${formatLoc(h.to)}`}</p>
+                <p className="title">{s.shelf} — {s.type === "in" ? "Scan in" : "Scan out"}</p>
+                <p className="sub">{s.ok} scans{s.fail ? ` · ${s.fail} failed` : ""} · {Math.max(1, Math.round((s.end - s.start) / 60000))} min{s.employee ? ` · ${s.employee}` : ""}</p>
               </div>
-              <p className="end muted">{timeAgo(h.movedAt)}</p>
+              <p className="end muted">{timeAgo(s.end)}</p>
             </li>
           ))}
         </ul>
