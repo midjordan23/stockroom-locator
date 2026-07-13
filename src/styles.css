@@ -22,7 +22,7 @@
   --mono: "Archivo", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #171412;
     --panel: #221f1c;
     --ink: #f2efec;
@@ -36,6 +36,20 @@
     --accent-tint: #3a201a;
     --accent-deep: #ff9783;
   }
+}
+:root[data-theme="dark"] {
+  --bg: #171412;
+  --panel: #221f1c;
+  --ink: #f2efec;
+  --sub: #a49d96;
+  --line: #38342f;
+  --border: #4c4741;
+  --chip: #2b2825;
+  --divider: rgba(242, 239, 236, 0.45);
+  --accent: #ff563c;
+  --accent-press: #ff7d60;
+  --accent-tint: #3a201a;
+  --accent-deep: #ff9783;
 }
 
 * { box-sizing: border-box; margin: 0; }
