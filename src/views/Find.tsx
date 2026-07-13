@@ -2,6 +2,21 @@ import { useState } from "react";
 import LocationCard from "./LocationCard";
 import LocationForm from "./LocationForm";
 import { deleteItem, formatLoc, getItems, Item, timeAgo } from "../store";
+import { delPhoto, usePhoto } from "../photos";
+
+function Row({ item, onClick }: { item: Item; onClick: () => void }) {
+  const photo = usePhoto(item.barcode);
+  return (
+    <li onClick={onClick}>
+      {photo ? <img className="thumb" src={photo} alt="" /> : <div className="thumb">👟</div>}
+      <div className="body">
+        <p className="title">{item.barcode}</p>
+        <p className="sub">{formatLoc(item)}</p>
+      </div>
+      <p className="end muted">{timeAgo(item.updatedAt)}</p>
+    </li>
+  );
+}
 
 export default function Find() {
   const [q, setQ] = useState("");
@@ -26,7 +41,7 @@ export default function Find() {
           <button className="btn primary" onClick={() => setEditing(true)}>Move / edit location</button>
           <button className="btn ghost" onClick={() => setSel(null)}>Back to list</button>
           <button className="btn ghost" style={{ color: "#c1121f", borderColor: "#c1121f" }}
-            onClick={() => { if (confirm(`Delete ${sel.barcode}?`)) { deleteItem(sel.barcode); setSel(null); } }}>
+            onClick={() => { if (confirm(`Delete ${sel.barcode}?`)) { deleteItem(sel.barcode); delPhoto(sel.barcode); setSel(null); } }}>
             Delete
           </button>
         </div>
@@ -45,15 +60,7 @@ export default function Find() {
         <p className="empty">{q ? "No match — check the number or scan the box." : "Nothing saved yet. Scan a shoe to get started."}</p>
       ) : (
         <ul className="list">
-          {items.map((i) => (
-            <li key={i.barcode} onClick={() => setSel(i)}>
-              <div className="body">
-                <p className="title">{i.barcode}</p>
-                <p className="sub">{formatLoc(i)}</p>
-              </div>
-              <p className="end muted">{timeAgo(i.updatedAt)}</p>
-            </li>
-          ))}
+          {items.map((i) => <Row key={i.barcode} item={i} onClick={() => setSel(i)} />)}
         </ul>
       )}
     </div>

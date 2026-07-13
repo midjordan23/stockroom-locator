@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getConfig, Loc, saveLocation } from "../store";
+import { compress, setPhoto, usePhoto } from "../photos";
 
 const Chips = ({ opts, value, onPick }: { opts: string[]; value: string; onPick: (v: string) => void }) => (
   <div className="chips">
@@ -13,10 +14,20 @@ export default function LocationForm({ barcode, initial, onSaved }: { barcode: s
   const cfg = getConfig();
   const [loc, setLoc] = useState<Loc>(initial ?? { room: cfg.rooms[0], rack: cfg.racks[0], shelf: cfg.shelves[0], bin: cfg.bins[0] });
   const pick = (k: keyof Loc) => (v: string) => setLoc({ ...loc, [k]: v });
+  const existing = usePhoto(barcode);
+  const [shot, setShot] = useState<string>();
+  const photo = shot ?? existing;
 
   return (
     <div>
       <p className="muted">Barcode: {barcode}</p>
+      <p className="label">Photo</p>
+      {photo && <img className="photo" src={photo} alt="Shoe" />}
+      <label className="btn ghost">
+        {photo ? "Retake photo" : "📸 Add photo"}
+        <input type="file" accept="image/*" capture="environment" hidden
+          onChange={async (e) => { const f = e.target.files?.[0]; if (f) setShot(await compress(f)); }} />
+      </label>
       <p className="label">Room</p>
       <Chips opts={cfg.rooms} value={loc.room} onPick={pick("room")} />
       <p className="label">Rack</p>
@@ -26,7 +37,7 @@ export default function LocationForm({ barcode, initial, onSaved }: { barcode: s
       <p className="label">Bin</p>
       <Chips opts={cfg.bins} value={loc.bin} onPick={pick("bin")} />
       <div style={{ height: 24 }} />
-      <button className="btn primary" onClick={() => { saveLocation(barcode, loc); onSaved(loc); }}>Save location</button>
+      <button className="btn primary" onClick={async () => { saveLocation(barcode, loc); if (shot) await setPhoto(barcode.trim(), shot); onSaved(loc); }}>Save location</button>
     </div>
   );
 }

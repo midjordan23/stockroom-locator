@@ -1,3 +1,5 @@
+import { allPhotos, setPhoto } from "./photos";
+
 export type Loc = { room: string; rack: string; shelf: string; bin: string };
 export type Item = Loc & { barcode: string; updatedAt: number };
 export type MoveRecord = { barcode: string; from: Loc | null; to: Loc; movedAt: number };
@@ -33,15 +35,16 @@ export function deleteItem(barcode: string) {
   write("srl.items", items);
 }
 
-export const exportSnapshot = () =>
-  JSON.stringify({ version: 1, items: getItems(), history: getHistory(), config: getConfig() }, null, 2);
+export const exportSnapshot = async () =>
+  JSON.stringify({ version: 1, items: getItems(), history: getHistory(), config: getConfig(), photos: await allPhotos() }, null, 2);
 
-export function importSnapshot(json: string) {
+export async function importSnapshot(json: string) {
   const snap = JSON.parse(json);
   if (!snap?.items || !snap?.config) throw new Error("Not a valid StockRoom backup file.");
   write("srl.items", snap.items);
   write("srl.history", snap.history ?? []);
   write("srl.config", snap.config);
+  for (const [k, v] of Object.entries(snap.photos ?? {})) await setPhoto(k, v as string);
   return Object.keys(snap.items).length;
 }
 

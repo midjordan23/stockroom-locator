@@ -26,16 +26,16 @@ export default function Admin() {
   const [msg, setMsg] = useState("");
   const file = useRef<HTMLInputElement>(null);
 
-  const doExport = () => {
+  const doExport = async () => {
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([exportSnapshot()], { type: "application/json" }));
+    a.href = URL.createObjectURL(new Blob([await exportSnapshot()], { type: "application/json" }));
     a.download = `stockroom-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
   };
 
   const doImport = async (f: File) => {
     try {
-      const n = importSnapshot(await f.text());
+      const n = await importSnapshot(await f.text());
       setCfg(getConfig());
       setMsg(`Restored ${n} items ✓`);
     } catch (e) {

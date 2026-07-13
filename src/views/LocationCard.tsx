@@ -1,8 +1,11 @@
 import { Item, timeAgo } from "../store";
+import { usePhoto } from "../photos";
 
 export default function LocationCard({ item }: { item: Item }) {
+  const photo = usePhoto(item.barcode);
   return (
     <div className="card">
+      {photo && <img className="photo" src={photo} alt="Shoe" />}
       <p className="code">{item.barcode}</p>
       <div className="loc-grid">
         <div><small>Room</small><b>{item.room}</b></div>
